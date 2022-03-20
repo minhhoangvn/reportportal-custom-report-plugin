@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Class-Path: 
+Plugin-Id: toilatested-debug
+Plugin-Version: 1.0
+Plugin-Provider: Report Portal
+Plugin-Class: com.toilatester.ReportExtendsPlugin
+Plugin-Service: api
+

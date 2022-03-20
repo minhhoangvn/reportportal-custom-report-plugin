@@ -12,6 +12,7 @@
 
 # Package Files #
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -25,3 +26,4 @@ build/
 .DS_Store
 .gradle/
 .idea/
+out/

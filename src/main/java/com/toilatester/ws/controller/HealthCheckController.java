@@ -16,7 +16,7 @@ public class HealthCheckController {
 
     @GetMapping(value = "/query")
     @ApiOperation("Get all data by custom query dashboard resources for specified project")
-    public ResponseEntity<?> demo(@RequestParam(name = "launchId") String launchId,
+    public ResponseEntity<?> demo(@RequestParam(name = "launchName") String launchId,
                                   @RequestParam(name = "tagsAttribute") String tagsAttribute,
                                   @AuthenticationPrincipal ReportPortalUser user) {
         return ResponseEntity.status(HttpStatus.OK)

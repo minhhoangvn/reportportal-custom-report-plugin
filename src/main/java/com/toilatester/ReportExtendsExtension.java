@@ -13,9 +13,10 @@ import com.toilatester.utils.MemoizingSupplier;
 import com.toilatester.ws.controller.ExtendsReportController;
 import com.toilatester.ws.controller.HealthCheckController;
 import org.pf4j.Extension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -33,6 +34,8 @@ import java.util.function.Supplier;
 
 @Extension
 public class ReportExtendsExtension implements ReportPortalExtensionPoint, DisposableBean {
+    public static final Logger LOGGER = LoggerFactory.getLogger(ReportExtendsExtension.class);
+
     private static final String PLUGIN_ID = "extends-report";
     public static final String BINARY_DATA_PROPERTIES_FILE_ID = "extends-report.properties";
 
@@ -81,42 +84,11 @@ public class ReportExtendsExtension implements ReportPortalExtensionPoint, Dispo
 
     // TODO: add logic to reload resource in serverless
     // allow to extend rest apis in ReportPortal.io
+    // https://stackoverflow.com/questions/5758504/is-it-possible-to-dynamically-set-requestmappings-in-spring-mvc/5758529#5758529
     @PostConstruct
     public void createIntegration() {
         initListeners();
-        System.err.println("==========");
-        System.err.println("==========");
-        System.err.println("==========");
-        System.err.println("==========");
-        System.out.println("Check instance application context " + applicationContext);
-        System.out.println("Check instance LaunchRepository context " + launchRepository);
-        System.err.println("==========");
-        System.err.println("==========");
-        System.err.println("==========");
-        System.err.println("==========");
-        try {
-            ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
-            AutowireCapableBeanFactory bf = applicationContext
-                    .getAutowireCapableBeanFactory();
-            ExtendsReportController extendsReportController = bf.createBean(ExtendsReportController.class);
-            HealthCheckController healthCheckController = bf.createBean(HealthCheckController.class);
-            bf.autowireBean(extendsReportController);
-            bf.autowireBean(healthCheckController);
-            beanFactory.registerSingleton(extendsReportController.getClass().getCanonicalName(), extendsReportController);
-            beanFactory.registerSingleton(healthCheckController.getClass().getCanonicalName(), healthCheckController);
-            genericContext.registerBean(ExtendsReportController.class, () -> extendsReportController);
-            ExtendsReportController bean = applicationContext.getBean(ExtendsReportController.class);
-            //((ConfigurableApplicationContext) applicationContext).refresh();
-            System.out.println("================");
-            System.out.println("================");
-            System.out.println("Reload");
-            System.out.println("================");
-            System.out.println("================");
-        } catch (Exception e) {
-            System.err.println("====== Error");
-            e.printStackTrace();
-        }
-
+        initDynamicRestController();
     }
 
     private void initListeners() {
@@ -124,6 +96,20 @@ public class ReportExtendsExtension implements ReportPortalExtensionPoint, Dispo
                 ApplicationEventMulticaster.class
         );
         applicationEventMulticaster.addApplicationListener(pluginLoadedListenerSupplier.get());
+    }
+
+    private void initDynamicRestController() {
+        try {
+            ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
+            ExtendsReportController extendsReportController = beanFactory.createBean(ExtendsReportController.class);
+            HealthCheckController healthCheckController = beanFactory.createBean(HealthCheckController.class);
+            beanFactory.registerSingleton(extendsReportController.getClass().getCanonicalName(), extendsReportController);
+            beanFactory.registerSingleton(healthCheckController.getClass().getCanonicalName(), healthCheckController);
+            beanFactory.autowireBean(extendsReportController);
+            beanFactory.autowireBean(healthCheckController);
+        } catch (Exception e) {
+            LOGGER.error("Error in init dynamic RestController", e);
+        }
     }
 
     @Override

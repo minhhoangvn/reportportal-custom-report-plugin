@@ -12,6 +12,7 @@ import java.util.Map;
 public class PluginEventHandlerFactory implements EventHandlerFactory<PluginEvent> {
 
     public static final String LOAD_KEY = "load";
+    public static final String UNLOAD_KEY = "unload";
 
     private final Map<String, EventHandler<PluginEvent>> eventHandlerMapping;
 
@@ -19,6 +20,9 @@ public class PluginEventHandlerFactory implements EventHandlerFactory<PluginEven
                                      PluginInfoProvider pluginInfoProvider) {
         this.eventHandlerMapping = new HashMap<>();
         this.eventHandlerMapping.put(LOAD_KEY,
+                new PluginLoadedEventHandler(integrationTypeRepository, integrationRepository, pluginInfoProvider)
+        );
+        this.eventHandlerMapping.put(UNLOAD_KEY,
                 new PluginLoadedEventHandler(integrationTypeRepository, integrationRepository, pluginInfoProvider)
         );
     }

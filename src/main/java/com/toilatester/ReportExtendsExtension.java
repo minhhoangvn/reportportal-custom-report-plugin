@@ -4,12 +4,15 @@ import com.epam.reportportal.extension.PluginCommand;
 import com.epam.reportportal.extension.ReportPortalExtensionPoint;
 import com.epam.reportportal.extension.common.IntegrationTypeProperties;
 import com.epam.reportportal.extension.event.PluginEvent;
-import com.epam.ta.reportportal.dao.*;
+import com.epam.ta.reportportal.commons.ReportPortalUser;
+import com.epam.ta.reportportal.dao.IntegrationRepository;
+import com.epam.ta.reportportal.dao.IntegrationTypeRepository;
 import com.toilatester.command.binary.GetFileCommand;
 import com.toilatester.event.PluginEventHandlerFactory;
 import com.toilatester.event.plugin.PluginEventListener;
 import com.toilatester.info.PluginInfoProviderImpl;
 import com.toilatester.utils.MemoizingSupplier;
+import com.toilatester.ws.controller.DummyController;
 import com.toilatester.ws.controller.ExtendsReportController;
 import com.toilatester.ws.controller.HealthCheckController;
 import org.pf4j.Extension;
@@ -23,10 +26,13 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +41,7 @@ import java.util.function.Supplier;
 @Extension
 public class ReportExtendsExtension implements ReportPortalExtensionPoint, DisposableBean {
     public static final Logger LOGGER = LoggerFactory.getLogger(ReportExtendsExtension.class);
-
+    private static final DummyController dummyController = new DummyController();
     private static final String PLUGIN_ID = "extends-report";
     public static final String BINARY_DATA_PROPERTIES_FILE_ID = "extends-report.properties";
 
@@ -46,25 +52,13 @@ public class ReportExtendsExtension implements ReportPortalExtensionPoint, Dispo
     private final String resourcesDir;
 
     @Autowired
-    private GenericWebApplicationContext genericContext;
+    private RequestMappingHandlerMapping requestMappingHandlerMapping;
+
+    @Autowired
+    private SimpleUrlHandlerMapping simpleUrlHandlerMapping;
 
     @Autowired
     private ApplicationContext applicationContext;
-
-    @Autowired
-    private DataSource dataSource;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private LaunchRepository launchRepository;
-
-    @Autowired
-    private TestItemRepository testItemRepository;
-
-    @Autowired
-    private ItemAttributeRepository itemAttributeRepository;
 
     @Autowired
     private IntegrationRepository integrationRepository;
@@ -110,11 +104,36 @@ public class ReportExtendsExtension implements ReportPortalExtensionPoint, Dispo
         } catch (Exception e) {
             LOGGER.error("Error in init dynamic RestController", e);
         }
+        initDummyController();
+    }
+
+    private void initDummyController() {
+        try {
+            RequestMappingInfo requestMappingInfo = RequestMappingInfo
+                    .paths("/dummyPath")
+                    .methods(RequestMethod.GET)
+                    .produces(MediaType.TEXT_PLAIN_VALUE)
+                    .build();
+
+            requestMappingHandlerMapping.
+                    registerMapping(requestMappingInfo, dummyController,
+                            DummyController.class.getDeclaredMethod("handleRequests", ReportPortalUser.class)
+                    );
+
+            Map<String, Object> urlMap = (Map<String, Object>) simpleUrlHandlerMapping.getUrlMap();
+            LOGGER.info("URL map before add new controller {}", urlMap);
+            urlMap.put("/dummyPath", dummyController);
+            LOGGER.info("URL map after add new controller {}", urlMap);
+            simpleUrlHandlerMapping.setUrlMap(urlMap);
+        } catch (NoSuchMethodException e) {
+            LOGGER.error("Error in init dynamic DummyController", e);
+        }
     }
 
     @Override
     public void destroy() {
         removeListeners();
+        removeController();
     }
 
     private void removeListeners() {
@@ -122,6 +141,22 @@ public class ReportExtendsExtension implements ReportPortalExtensionPoint, Dispo
                 ApplicationEventMulticaster.class
         );
         applicationEventMulticaster.removeApplicationListener(pluginLoadedListenerSupplier.get());
+    }
+
+    private void removeController() {
+        RequestMappingInfo requestMappingInfo = RequestMappingInfo
+                .paths("/dummyPath")
+                .methods(RequestMethod.GET)
+                .produces(MediaType.TEXT_PLAIN_VALUE)
+                .build();
+
+        requestMappingHandlerMapping.unregisterMapping(requestMappingInfo);
+
+        Map<String, Object> urlMap = (Map<String, Object>) simpleUrlHandlerMapping.getUrlMap();
+        LOGGER.info("URL map before remove new controller {}", urlMap);
+        urlMap.remove("/dummyPath");
+        LOGGER.info("URL map after remove new controller {}", urlMap);
+        simpleUrlHandlerMapping.setUrlMap(urlMap);
     }
 
     @Override

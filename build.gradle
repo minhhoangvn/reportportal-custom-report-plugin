@@ -7,7 +7,7 @@ plugins {
     id 'nu.studer.jooq' version '3.0.3'
 }
 
-//apply from: 'ui.gradle'
+apply from: 'ui.gradle'
 
 project.ext {
     dependencyRepos = ["plugin-api", "commons-bom"]
@@ -137,4 +137,4 @@ wrapper {
 
 build.dependsOn(shadowJar)
 
-//compileJava.dependsOn npm_run_build
+compileJava.dependsOn npm_run_build

@@ -42,6 +42,8 @@ import java.util.function.Supplier;
 public class ReportExtendsExtension implements ReportPortalExtensionPoint, DisposableBean {
     public static final Logger LOGGER = LoggerFactory.getLogger(ReportExtendsExtension.class);
     private static final DummyController dummyController = new DummyController();
+    // This must match with the plugin-id
+    // when we build with MANIFEST.MF after building the plugin
     private static final String PLUGIN_ID = "toilatester";
     public static final String BINARY_DATA_PROPERTIES_FILE_ID = "extends-report.properties";
 

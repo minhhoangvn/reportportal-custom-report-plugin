@@ -3,7 +3,7 @@ import { IntegrationFormFields } from './components/integrationFormFields';
 import { IntegrationSettings } from './components/integrationSettings';
 
 window.RP.registerPlugin({
-  name: 'example',
+  name: 'toilatester',
   extensions: [
     {
       name: 'integrationSettings',
@@ -18,8 +18,8 @@ window.RP.registerPlugin({
       component: IntegrationFormFields,
     },
     {
-      name: 'example',
-      title: 'Example plugin',
+      name: 'toilatester',
+      title: 'toilatester plugin',
       type: 'uiExtension:settingsTab',
       component: ExamplePluginTab,
     },

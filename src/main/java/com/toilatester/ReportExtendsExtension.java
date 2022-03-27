@@ -42,7 +42,7 @@ import java.util.function.Supplier;
 public class ReportExtendsExtension implements ReportPortalExtensionPoint, DisposableBean {
     public static final Logger LOGGER = LoggerFactory.getLogger(ReportExtendsExtension.class);
     private static final DummyController dummyController = new DummyController();
-    private static final String PLUGIN_ID = "extends-report";
+    private static final String PLUGIN_ID = "toilatester";
     public static final String BINARY_DATA_PROPERTIES_FILE_ID = "extends-report.properties";
 
     private final Supplier<Map<String, PluginCommand<?>>> pluginCommandMapping = new MemoizingSupplier<>(this::getCommands);
@@ -173,7 +173,9 @@ public class ReportExtendsExtension implements ReportPortalExtensionPoint, Dispo
 
     private Map<String, PluginCommand<?>> getCommands() {
         Map<String, PluginCommand<?>> pluginCommandMapping = new HashMap<>();
-        pluginCommandMapping.put("getFile", new GetFileCommand(resourcesDir, BINARY_DATA_PROPERTIES_FILE_ID));
+        final GetFileCommand getFileCommand = new GetFileCommand(resourcesDir, BINARY_DATA_PROPERTIES_FILE_ID);
+
+        pluginCommandMapping.put(getFileCommand.getName(), getFileCommand);
         pluginCommandMapping.put("testConnection", (integration, params) -> true);
         return pluginCommandMapping;
     }

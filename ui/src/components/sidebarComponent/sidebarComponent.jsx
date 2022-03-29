@@ -11,6 +11,7 @@ export const SidebarToilatesterButton = (props) => {
   const item = {
     link: {
       type: 'PROJECT_DASHBOARD_PAGE',
+      payload: { projectId: activeProject },
     },
   };
   return (

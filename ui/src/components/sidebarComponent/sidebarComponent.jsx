@@ -12,6 +12,32 @@ export const SidebarToilatesterButton = (props, ...args) => {
   console.log('this', this);
   console.log('window', window);
   console.log('activeProject', activeProject);
+  const { useEffect, useState } = React;
+  console.log(localStorage);
+  const [advice, setAdvice] = useState("");
+  useEffect(() => {
+    const url = `http://${window.location.host}/api/dummyPath`;
+    const fetchData = async () => {
+      const token = JSON.parse(localStorage.getItem('token'));
+      const authorization = `bearer ${token.value}`;
+      const headers = { Authorization: authorization };
+      try {
+        console.log(headers);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers,
+        });
+        const json = await response.json();
+        console.log(json.slip.advice);
+        setAdvice(json.slip.advice);
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const item = {
     link: {
       type: 'PROJECT_DASHBOARD_PAGE',

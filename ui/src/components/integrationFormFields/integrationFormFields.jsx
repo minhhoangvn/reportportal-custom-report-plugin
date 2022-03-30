@@ -23,9 +23,9 @@ export const IntegrationFormFields = (props) => {
         </FieldErrorHint>
       </IntegrationFormField>
       <IntegrationFormField
-        name="url"
+        name="integrationValue"
         disabled={disabled}
-        label="URL"
+        label="Integration Value"
         validate={requiredField}
         lineAlign={lineAlign}
       >

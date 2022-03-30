@@ -14,7 +14,7 @@ export const SidebarToilatesterButton = (props, ...args) => {
   console.log('activeProject', activeProject);
   const { useEffect, useState } = React;
   console.log(localStorage);
-  const [advice, setAdvice] = useState("");
+  const [advice, setAdvice] = useState('');
   useEffect(() => {
     const url = `http://${window.location.host}/api/dummyPath`;
     const fetchData = async () => {
@@ -31,7 +31,7 @@ export const SidebarToilatesterButton = (props, ...args) => {
         console.log(json.slip.advice);
         setAdvice(json.slip.advice);
       } catch (error) {
-        console.log("error", error);
+        console.log('error', error);
       }
     };
 
@@ -52,7 +52,7 @@ export const SidebarToilatesterButton = (props, ...args) => {
       link={item.link}
       icon={ToilatesterIcon}
     >
-      PQE Extend UI
+      Extend UI
     </SidebarButton>
   );
 };

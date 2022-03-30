@@ -7,6 +7,8 @@ import com.epam.reportportal.extension.event.PluginEvent;
 import com.epam.ta.reportportal.commons.ReportPortalUser;
 import com.epam.ta.reportportal.dao.IntegrationRepository;
 import com.epam.ta.reportportal.dao.IntegrationTypeRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.toilatester.command.binary.GetFileCommand;
 import com.toilatester.event.PluginEventHandlerFactory;
 import com.toilatester.event.plugin.PluginEventListener;
@@ -176,9 +178,18 @@ public class ReportExtendsExtension implements ReportPortalExtensionPoint, Dispo
     private Map<String, PluginCommand<?>> getCommands() {
         Map<String, PluginCommand<?>> pluginCommandMapping = new HashMap<>();
         final GetFileCommand getFileCommand = new GetFileCommand(resourcesDir, BINARY_DATA_PROPERTIES_FILE_ID);
-
         pluginCommandMapping.put(getFileCommand.getName(), getFileCommand);
         pluginCommandMapping.put("testConnection", (integration, params) -> true);
+        pluginCommandMapping.put("dummyCommand", (integration, params) -> convertParamsToString(params));
         return pluginCommandMapping;
+    }
+
+    private String convertParamsToString(Map<String, Object> params) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(params);
+        } catch (JsonProcessingException e) {
+            return e.getMessage();
+        }
     }
 }
